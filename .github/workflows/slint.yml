@@ -5,11 +5,59 @@ on:
     branches:
       - main
 
-    paths:
-      - ./slint
-
 jobs:
   win32:
-    name: Build Sline
+    name: Build Slint (${{ matrix.target }})
 
-    runs-on: windows-latest
+    runs-on: windows-11-latest
+
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-pc-windows-msvc
+            arch: X64
+
+          - target: aarch64-pc-windows-msvc
+            arch: ARM64
+
+          - target: i686-pc-windows-msvc
+            arch: X86
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v7
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: nightly
+          targets: ${{ matrix.target }}
+
+      - name: Clone Slint
+        run: |
+          git clone --depth 1 --branch release/1 https://github.com/slint-ui/slint.git
+
+      - name: CMake Setup Build
+        working-directory: slint
+        run: |
+          cmake -B build -S . `
+            -A ${{ matrix.arch }} `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DBUILD_SHARED_LIBS=OFF `
+            -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" `
+            -DCMAKE_INSTALL_PREFIX="./slintbuild"
+
+          cmake --build build --config Release
+          cmake --install build --config Release
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          compression-level: 9
+          name: ${{ matrix.target }}
+          archive: true
+          path: |
+            slint/slintbuild/
