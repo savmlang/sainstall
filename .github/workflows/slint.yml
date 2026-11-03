@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+    paths:
+      - slint.version
+
 jobs:
   win32:
     name: Build Slint (${{ matrix.target }})
@@ -39,7 +42,10 @@ jobs:
 
       - name: Clone Slint
         run: |
-          git clone --depth 1 --branch release/1 https://github.com/slint-ui/slint.git
+          $ver = Get-Content slint.version
+          $branch = $ver.Split("+")[0]
+
+          git clone --depth 1 --branch "release/$branch" https://github.com/slint-ui/slint.git
 
       - name: CMake Setup Build
         working-directory: slint
@@ -49,6 +55,10 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release `
             -DBUILD_SHARED_LIBS=OFF `
             -DCMAKE_MSVC_RUNTIME_LIBRARY="MultiThreaded" `
+            -DSLINT_FEATURE_INTERPRETER=OFF `
+            -DSLINT_FEATURE_TESTING=OFF `
+            -DSLINT_FEATURE_SYSTEM_TRAY=OFF `
+            -DSLINT_FEATURE_RENDERER_SOFTWARE=OFF `
             -DCMAKE_INSTALL_PREFIX="./slintbuild"
 
           cmake --build build --config Release
@@ -62,3 +72,32 @@ jobs:
           archive: true
           path: |
             slint/slintbuild/
+
+  publish:
+    needs: [win32]
+
+    runs-on: windows-11-arm
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v7
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: libs
+          skip-decompress: true
+          merge-multiple: true
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ github.run_id }}.${{ github.run_attempt }}
+          make_latest: true
+          body: |
+            Slint C++ Build
+          files: |
+            ./libs/*
