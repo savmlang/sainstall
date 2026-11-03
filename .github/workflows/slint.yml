@@ -74,6 +74,11 @@ jobs:
             slint/slintbuild/
 
   publish:
+    name: Publish Slint Build
+
+    permissions:
+      contents: write
+
     needs: [win32]
 
     runs-on: windows-11-arm
