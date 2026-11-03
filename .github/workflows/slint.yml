@@ -12,6 +12,7 @@ jobs:
     runs-on: windows-11-arm
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           - target: x86_64-pc-windows-msvc
@@ -21,7 +22,7 @@ jobs:
             arch: ARM64
 
           - target: i686-pc-windows-msvc
-            arch: X86
+            arch: Win32
 
     steps:
       - name: Checkout
