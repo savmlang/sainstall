@@ -9,7 +9,7 @@ jobs:
   win32:
     name: Build Slint (${{ matrix.target }})
 
-    runs-on: windows-11-latest
+    runs-on: windows-11-arm
 
     strategy:
       matrix:
