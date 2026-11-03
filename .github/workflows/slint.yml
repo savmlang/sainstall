@@ -1,0 +1,15 @@
+name: Build Slint
+
+on:
+  push:
+    branches:
+      - main
+
+    paths:
+      - ./slint
+
+jobs:
+  win32:
+    name: Build Sline
+
+    runs-on: windows-latest
