@@ -1,0 +1,19 @@
+export struct SDKConfig { keepCHeaders: bool, keepLibraryStubs: bool, keepStaticArchives: bool }
+export struct ToolConfig { saTestBinary: bool, saAppRuntime: bool }
+export struct InstallConfig { addToPath: bool, startMenuEntries: bool }
+
+export struct Configuration { sdkConfig: SDKConfig, toolConfig: ToolConfig, windowsConfig: InstallConfig }
+
+export global ConfigDefaults {
+    out property <SDKConfig> sdkNone: { keepCHeaders: false, keepLibraryStubs: false, keepStaticArchives: false };
+    out property <SDKConfig> sdkDefault: { keepCHeaders: true, keepLibraryStubs: false, keepStaticArchives: false };
+
+    out property <ToolConfig> toolNone: { saTestBinary: false, saAppRuntime: false };
+    out property <ToolConfig> toolDefault: { saTestBinary: true, saAppRuntime: false };
+
+    out property <Configuration> configDefault: {
+        sdkConfig: ConfigDefaults.sdkDefault,
+        toolConfig: ConfigDefaults.toolDefault,
+        windowsConfig: { startMenuEntries: true, addToPath: true }
+    };
+}

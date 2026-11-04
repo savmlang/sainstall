@@ -1,4 +1,4 @@
-name: Build Slint
+name: Build Slint + Coreinstaller
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
     paths:
       - slint.version
+      - coreinstaller
 
 jobs:
   win32:
@@ -64,7 +65,12 @@ jobs:
           cmake --build build --config Release
           cmake --install build --config Release
 
-      - name: Upload
+      - name: CMake Setup Build
+        working-directory: coreinstaller
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+
+      - name: Upload Slint
         uses: actions/upload-artifact@v7
         with:
           compression-level: 9
@@ -72,6 +78,15 @@ jobs:
           archive: true
           path: |
             slint/slintbuild/
+
+      - name: Upload Coreinstaller
+        uses: actions/upload-artifact@v7
+        with:
+          compression-level: 9
+          name: ${{ matrix.target }}
+          archive: true
+          path: |
+            coreinstaller/target/${{ matrix.target }}/release/coreinstaller.lib
 
   publish:
     name: Publish Slint Build
