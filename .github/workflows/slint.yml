@@ -7,7 +7,7 @@ on:
 
     paths:
       - slint.version
-      - coreinstaller/
+      - coreinstaller/**
 
 jobs:
   win32:
