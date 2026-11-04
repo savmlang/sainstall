@@ -13,7 +13,7 @@ jobs:
   win32:
     name: Build Slint (${{ matrix.target }})
 
-    runs-on: windows-11-arm
+    runs-on: ${{ matrix.runner || 'windows-11-arm' }}
 
     strategy:
       fail-fast: false
@@ -21,12 +21,14 @@ jobs:
         include:
           - target: x86_64-pc-windows-msvc
             arch: X64
+            runner: windows-latest
 
           - target: aarch64-pc-windows-msvc
             arch: ARM64
 
           - target: i686-pc-windows-msvc
             arch: Win32
+            runner: windows-latest
 
     steps:
       - name: Checkout
@@ -65,10 +67,12 @@ jobs:
           cmake --build build --config Release
           cmake --install build --config Release
 
-      - name: CMake Setup Build
+      - name: Build coreinstaller
         working-directory: coreinstaller
         run: |
           cargo build --release --target ${{ matrix.target }}
+        env:
+          RUSTFLAGS: -C target-feature=+crt-static
 
       - name: Upload Slint
         uses: actions/upload-artifact@v7
