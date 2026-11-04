@@ -1,6 +1,7 @@
 use std::{
   env::current_exe, fs, marker::PhantomData, path::PathBuf, thread::sleep, time::Duration,
 };
+
 use windows::Win32::{
   Storage::FileSystem::{MOVEFILE_DELAY_UNTIL_REBOOT, MoveFileExW},
   System::Threading::ExitProcess,

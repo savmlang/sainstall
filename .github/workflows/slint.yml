@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           compression-level: 9
-          name: ${{ matrix.target }}
+          name: coreinstaller_${{ matrix.target }}
           archive: true
           path: |
             coreinstaller/target/${{ matrix.target }}/release/coreinstaller.lib
