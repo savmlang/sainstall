@@ -26,6 +26,7 @@ enum Page {
 
 static NOINPUT: AtomicBool = AtomicBool::new(false);
 
+#[unsafe(no_mangle)]
 pub extern "C" fn cli(args: Slice<*const c_char>, license: StringSlice, zip: Slice<u8>) {
   let guard = unsafe { ComGuard(CoInitialize(None).is_ok()) };
 
