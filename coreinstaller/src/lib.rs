@@ -13,6 +13,7 @@ use crate::{
   regedit::{cleanup_registry, setup_registry},
 };
 
+pub mod cli;
 mod dir;
 mod regedit;
 
@@ -57,14 +58,14 @@ pub struct SDKConfig {
 }
 
 #[repr(C)]
-pub struct Slice<'a> {
-  pub pt: *const u8,
+pub struct Slice<'a, T> {
+  pub pt: *const T,
   pub len: usize,
 
   pub _life: PhantomData<&'a ()>,
 }
 
-pub type StringSlice<'a> = Slice<'a>;
+pub type StringSlice<'a> = Slice<'a, u8>;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn install_info(
@@ -75,7 +76,7 @@ pub extern "C" fn install_info(
   autoexit: bool,
 
   config: Config,
-  zip: Slice,
+  zip: Slice<u8>,
 ) {
   let path;
   if repair {

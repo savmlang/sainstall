@@ -13,8 +13,16 @@ else()
   message(WARNING "SAVM_TARGET_TRIPLE was not specified. Defaulting to x64")
 endif()
 
-set(CLI "savm_installer_$ENV{SAVM_TARGET_TRIPLE}_cli")
-set(GUI "savm_installer_$ENV{SAVM_TARGET_TRIPLE}_gui")
+if(DEFINED ENV{SAVM_EDITION} AND NOT "$ENV{SAVM_EDITION}" STREQUAL "")
+  set(EDITION "$ENV{SAVM_EDITION}")
+else()
+  set(EDITION "nano")
+  message(WARNING "SAVM_EDITION was not specified. Defaulting to nano")
+endif()
+
+set(CLI "savm-${TRIPLE}-${EDITION}-installer_cli.exe")
+set(GUI "savm-${TRIPLE}-${EDITION}-installer_gui.exe")
+set(ZIP "savm-${TRIPLE}-${EDITION}.zip")
 
 # coreinstaller
 FetchContent_Declare(
@@ -34,8 +42,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 # C++ Latest
 if (MSVC)
-  unset(CMAKE_CXX_STANDARD)
-  add_compile_options(/std:c++latest)
+  set(CMAKE_CXX_STANDARD 26)
 else()
   message(FATAL_ERROR "SaVM Win32 installer is only configured for MSVC")
 endif()
@@ -66,15 +73,38 @@ set_target_properties(Slint::Compiler PROPERTIES
   IMPORTED_LOCATION "${SLINT_COMPILER_BIN}"
 )
 
+# #embed macros, LICENSE
+set(PAYLOAD_BIN_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE")
+set(PAYLOAD_BIN_BUILD "${CMAKE_CURRENT_SOURCE_DIR}/../../build.zip")
+set(PAYLOAD_HDR "${CMAKE_CURRENT_BINARY_DIR}/generated/embedded_payload.h")
+
+add_custom_command(
+  OUTPUT "${PAYLOAD_HDR}"
+  COMMAND ${CMAKE_COMMAND}
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_embed.cmake"
+  DEPENDS "${PAYLOAD_BIN_LICENSE}"
+  DEPENDS "${PAYLOAD_BIN_BUILD}"
+  COMMENT "Embedding ${PAYLOAD_BIN} -> ${PAYLOAD_HDR}"
+  VERBATIM
+)
+
+
 # SaVM CLI Installer
 add_executable(savm_cli
   installer/cli.c++
+  resource.rc
 )
 
 target_link_libraries(savm_cli
   PRIVATE CoreInstaller::Static
 )
-set_target_properties(savm_cli PROPERTIES OUTPUT_NAME ${CLI})
+target_link_options(savm_cli PRIVATE 
+  "/MANIFEST:NO"
+)
+target_compile_options(savm_cli PRIVATE /std:c++latest)
+
+target_sources(savm_cli PRIVATE "${PAYLOAD_HDR}")
+target_include_directories(savm_cli PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 # SaVM GUI Installer
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated")
@@ -85,7 +115,7 @@ add_custom_command(
   OUTPUT "${SLINT_GENERATED_HEADER}"
   COMMAND Slint::Compiler
     "${SLINT_UI_FILE}"
-    --output "${SLINT_GENERATED_HEADER}"
+    -o "${SLINT_GENERATED_HEADER}"
     -I "${CMAKE_CURRENT_SOURCE_DIR}/ui"
     --style "fluent"
   DEPENDS "${SLINT_UI_FILE}" Slint::Compiler
@@ -94,12 +124,52 @@ add_custom_command(
 )
 
 add_executable(savm_gui
-  installer/gui.c++
   "${SLINT_GENERATED_HEADER}"
+  installer/gui.c++
+  installer/gui/osver.c++
+  installer/gui/mica.c++
+  resource.rc
 )
 
-target_include_directories(savm_gui PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
+target_compile_options(savm_gui PRIVATE /std:c++latest)
+target_include_directories(savm_gui 
+  PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated"
+  PRIVATE "${slint_SOURCE_DIR}/include/slint"
+)
 target_link_libraries(savm_gui 
   PRIVATE CoreInstaller::Static
   PRIVATE Slint::Static
+  ws2_32
+  ntdll
+  imm32
+  uxtheme
+  dwmapi
+  userenv
 )
+
+target_sources(savm_gui PRIVATE "${PAYLOAD_HDR}")
+
+target_link_options(savm_gui PRIVATE 
+  "/SUBSYSTEM:WINDOWS" 
+  "/ENTRY:mainCRTStartup"
+  "/MANIFEST:NO"
+)
+
+# CMAKE Install
+install(CODE [[
+  file(INSTALL 
+    "${CMAKE_CURRENT_BINARY_DIR}/savm_cli.exe"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/"
+    RENAME "${CLI}"
+  )
+  file(INSTALL 
+    "${CMAKE_CURRENT_BINARY_DIR}/savm_gui.exe"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/"
+    RENAME "${GUI}"
+  )
+  file(INSTALL 
+    "${PAYLOAD_BIN_BUILD}"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    RENAME "${ZIP}"
+  )
+]])

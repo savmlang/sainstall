@@ -1,0 +1,47 @@
+#include <windows.h>
+
+// 1. Application Icon
+1 ICON "assets/salang.ico"
+
+// 2. Metadata
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+
+// 3. Debug
+#ifdef _DEBUG
+FILEFLAGS       VS_FF_DEBUG
+#else
+FILEFLAGS       0x0L
+#endif
+
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        // 0409 = U.S. English, 04B0 = Unicode (UTF-16)
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "SaVM Programming Language"
+            VALUE "FileDescription",  "Install the SaVM Runtime on your computer!"
+            VALUE "FileVersion",      "0.0.0.0"
+            VALUE "InternalName",     "savminstaller"
+            VALUE "LegalCopyright",   "Copyright © 2026-Present SaVM Programming Language Core Team & Contributors"
+            VALUE "OriginalFilename", "savminstall.exe"
+            VALUE "ProductName",      "SaVM Runtime"
+            VALUE "ProductVersion",   "0.0.0.0"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        // Must match the language and code page block above (0x0409, 1200)
+        VALUE "Translation", 0x0409, 1200
+    END
+END
+
+1 24 "app.manifest"
