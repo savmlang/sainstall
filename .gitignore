@@ -1,3 +1,5 @@
+pass.txt
+
 # Prerequisites
 *.d
 
@@ -42,6 +44,7 @@
 build/
 Build/
 build-*/
+dist/
 
 # CMake generated files
 CMakeFiles/

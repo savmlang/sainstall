@@ -20,20 +20,26 @@ else()
   message(WARNING "SAVM_EDITION was not specified. Defaulting to nano")
 endif()
 
-set(CLI "savm-${TRIPLE}-${EDITION}-installer_cli.exe")
-set(GUI "savm-${TRIPLE}-${EDITION}-installer_gui.exe")
+set(CLI "savm-${TRIPLE}-${EDITION}-installer_cli")
+set(GUI "savm-${TRIPLE}-${EDITION}-installer_gui")
 set(ZIP "savm-${TRIPLE}-${EDITION}.zip")
 
 # coreinstaller
 FetchContent_Declare(
   coreinstaller
   URL "https://github.com/savmlang/sainstall/releases/latest/download/coreinstaller_${TRIPLE}.zip"
+  HTTP_HEADER
+    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    "Connection: close"
 )
 
 # slint
 FetchContent_Declare(
   slint
   URL "https://github.com/savmlang/sainstall/releases/latest/download/${TRIPLE}.zip"
+  HTTP_HEADER
+    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36"
+    "Connection: close"
 )
 
 # /MT (or, /MTd)
@@ -75,13 +81,15 @@ set_target_properties(Slint::Compiler PROPERTIES
 
 # #embed macros, LICENSE
 set(PAYLOAD_BIN_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE")
-set(PAYLOAD_BIN_BUILD "${CMAKE_CURRENT_SOURCE_DIR}/../../build.zip")
+set(PAYLOAD_BIN_BUILD "${CMAKE_CURRENT_SOURCE_DIR}/../../${ZIP}")
 set(PAYLOAD_HDR "${CMAKE_CURRENT_BINARY_DIR}/generated/embedded_payload.h")
 
 add_custom_command(
   OUTPUT "${PAYLOAD_HDR}"
   COMMAND ${CMAKE_COMMAND}
     -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_embed.cmake"
+    "${PAYLOAD_BIN_LICENSE}"
+    "${PAYLOAD_BIN_BUILD}"
   DEPENDS "${PAYLOAD_BIN_LICENSE}"
   DEPENDS "${PAYLOAD_BIN_BUILD}"
   COMMENT "Embedding ${PAYLOAD_BIN} -> ${PAYLOAD_HDR}"
@@ -95,8 +103,14 @@ add_executable(savm_cli
   resource.rc
 )
 
+set_target_properties(savm_cli PROPERTIES
+  OUTPUT_NAME "${CLI}"
+)
+
 target_link_libraries(savm_cli
   PRIVATE CoreInstaller::Static
+  ws2_32
+  ntdll
 )
 target_link_options(savm_cli PRIVATE 
   "/MANIFEST:NO"
@@ -131,6 +145,10 @@ add_executable(savm_gui
   resource.rc
 )
 
+set_target_properties(savm_gui PROPERTIES
+  OUTPUT_NAME "${GUI}"
+)
+
 target_compile_options(savm_gui PRIVATE /std:c++latest)
 target_include_directories(savm_gui 
   PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated"
@@ -155,21 +173,22 @@ target_link_options(savm_gui PRIVATE
   "/MANIFEST:NO"
 )
 
-# CMAKE Install
-install(CODE [[
+# 1. Resolve target paths at configuration time into variables
+set(CLI_PATH "$<TARGET_FILE:savm_cli>")
+set(GUI_PATH "$<TARGET_FILE:savm_gui>")
+
+# 2. Use double quotes so variables expand properly
+install(CODE "
   file(INSTALL 
-    "${CMAKE_CURRENT_BINARY_DIR}/savm_cli.exe"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/"
-    RENAME "${CLI}"
+    \"${CLI_PATH}\"
+    DESTINATION \"\${CMAKE_INSTALL_PREFIX}/\"
   )
   file(INSTALL 
-    "${CMAKE_CURRENT_BINARY_DIR}/savm_gui.exe"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/"
-    RENAME "${GUI}"
+    \"${GUI_PATH}\"
+    DESTINATION \"\${CMAKE_INSTALL_PREFIX}/\"
   )
   file(INSTALL 
-    "${PAYLOAD_BIN_BUILD}"
-    DESTINATION "${CMAKE_INSTALL_PREFIX}"
-    RENAME "${ZIP}"
+    \"${PAYLOAD_BIN_BUILD}\"
+    DESTINATION \"\${CMAKE_INSTALL_PREFIX}/\"
   )
-]])
+")

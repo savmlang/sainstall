@@ -1,0 +1,1 @@
+Copy-Item -Path "../$env:PACKAGE.zip" -Destination "./dist/$env:PACKAGE.zip"

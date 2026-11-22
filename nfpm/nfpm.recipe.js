@@ -20,7 +20,7 @@ const getVersion = () => {
   const regexp = /metadata\.savm\.version = "v?([0-9]+\.[0-9]+\.[0-9]+(.*)?)"/;
 
   let v;
-  readFileSync(join(import.meta.dirname, "../../../Cargo.toml"))
+  readFileSync(join(import.meta.dirname, "../../Cargo.toml"))
     .toString()
     .split("\n")
     .find((txt) => {
@@ -39,7 +39,7 @@ const getVersion = () => {
   return v;
 };
 
-const getReleaseSupport = () => {
+const ensureReleaseSupport = () => {
   let support = false;
 
   try {
@@ -51,13 +51,14 @@ const getReleaseSupport = () => {
 
   if (!support) {
     console.log("[INFO]: NOT USING SIGNING SUPPORT");
+    throw new Error("UNEXPECTED - Signing Must be Used");
   }
-
-  return support;
 };
 
 const main = () => {
-  let recipe = readFileSync("./nfpm.recipe.yaml").toString();
+  let recipe = readFileSync(
+    join(import.meta.dirname, "nfpm.recipe.yaml"),
+  ).toString();
 
   const edition = process.env["EDITION"];
 
@@ -75,25 +76,9 @@ const main = () => {
     recipe = recipe.replaceAll(k, v || "");
   });
 
-  const supportsRelease = getReleaseSupport();
+  ensureReleaseSupport();
 
-  const newrecipe = [];
-
-  let release = false;
-  recipe.split("\n").forEach((line) => {
-    if (line.trim() == "!#RELEASE") {
-      release = true;
-      return;
-    }
-
-    if (!release) {
-      newrecipe.push(line);
-    } else if (supportsRelease) {
-      newrecipe.push(line);
-    }
-  });
-
-  writeFileSync("./nfpm.yaml", newrecipe.join("\n"));
+  writeFileSync(join(import.meta.dirname, "nfpm.yaml"), recipe.join("\n"));
 };
 
 main();

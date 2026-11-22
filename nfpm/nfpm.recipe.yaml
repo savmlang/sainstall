@@ -120,7 +120,7 @@ contents:
     file_info:
       mode: 0755
       owner: root
-  
+
   - src: /opt/savm/sasm
     dst: /usr/bin/sasm
     type: symlink
@@ -157,23 +157,20 @@ overrides:
       - zstd-libs
       - libstdc++
 
-# The Below is a preprocessor entry
-# On non-release build, we want to strip it entirely
-!#RELEASE
 deb:
   signature:
     method: debsign
     signer: Akshanabha Chakraborty <ahqsecret@gmail.com>
     type: origin
-    key_file: '{%KEYGPG}'
+    key_file: "{%KEYGPG}"
     key_id: ${GPG_KEY_ID}
 
 rpm:
   signature:
-    key_file: '{%KEYGPG}'
+    key_file: "{%KEYGPG}"
     key_id: ${GPG_KEY_ID}
 
 apk:
   signature:
-    key_file: '{%KEYPEM}'
+    key_file: "{%KEYPEM}"
     key_name: savm_development

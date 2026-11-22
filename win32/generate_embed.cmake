@@ -1,6 +1,6 @@
 # Read binary as raw hex
-set(LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE")
-set(BUILD "${CMAKE_CURRENT_SOURCE_DIR}/../../build.zip")
+set(LICENSE "${CMAKE_ARGV3}")
+set(BUILD "${CMAKE_ARGV4}")
 
 file(READ "${LICENSE}" HEX_DATA_LICENSE HEX)
 file(READ "${BUILD}" HEX_DATA_ZIP HEX)
