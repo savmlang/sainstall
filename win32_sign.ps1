@@ -7,12 +7,16 @@ $arch = switch ($env:TARGET) {
 $sdkPath = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows Kits\Installed Roots").KitsRoot10
 $signtool = Get-ChildItem -Path "${sdkPath}bin\*\$arch\signtool.exe" | Select-Object -ExpandProperty FullName -First 1
 
-$thumbprint = Get-Content "$PSScriptRoot/thumb.txt"
+$thumbprint = (Get-Content "$PSScriptRoot/thumb.txt" -Raw).Trim()
 
-Write-Host "Signing: $($env:BINARY)"
+"Using Thumbprint : $thumbprint"
+
+foreach ($arg in $args) {
+  "Signing: $arg"
+}
 
 & $signtool sign `
   /s "My" /sha1 "$thumbprint" `
   /fd SHA512 /tr "http://timestamp.digicert.com" `
   /td SHA512 /v `
-  "$env:BINARY"
+  @args

@@ -7,7 +7,7 @@ $arch = switch ($env:TARGET) {
 $env:SAVM_TARGET_TRIPLE = $env:TARGET
 $target = $env:TARGET
 
-$env:SAVM_EDITION = $env:PACKAGE.Replace("savm-$target-", "")
+$env:SAVM_EDITION = $env:PACKAGE.Split("-")[-1]
 
 cmake -B build `
   -S win32 `
@@ -19,14 +19,6 @@ cmake --build build --config Release
 
 cmake --install build --config Release
 
-$items = Get-ChildItem -Path "./dist"
-
+$items = Get-ChildItem -Path "./dist/" -Filter "*.exe" -File | Select-Object -ExpandProperty FullName
 ./win32_loadsign.ps1
-
-foreach ($item in $items) {
-  if ($item.Name.EndsWith(".exe")) {
-    $item.FullName
-    $env:BINARY = $item.FullName
-    ./win32_sign.ps1
-  }
-}
+./win32_sign.ps1 @items
