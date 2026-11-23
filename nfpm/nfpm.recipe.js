@@ -78,7 +78,7 @@ const main = () => {
 
   ensureReleaseSupport();
 
-  writeFileSync(join(import.meta.dirname, "nfpm.yaml"), recipe.join("\n"));
+  writeFileSync(join(import.meta.dirname, "nfpm.yaml"), recipe);
 };
 
 main();
