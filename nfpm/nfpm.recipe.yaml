@@ -43,7 +43,7 @@ contents:
       mode: 0755
       owner: root
 
-  - src: "../../../LICENSE"
+  - src: "../../LICENSE"
     dst: /opt/savm/LICENSE
     file_info:
       mode: 0755
