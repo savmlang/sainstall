@@ -7,7 +7,7 @@ $arch = switch ($env:TARGET) {
 $env:SAVM_TARGET_TRIPLE = $env:TARGET
 $target = $env:TARGET
 
-$env:SAVM_EDITION = $env:PACKAGE.Replace("$target-", "")
+$env:SAVM_EDITION = $env:PACKAGE.Replace("savm-$target-", "")
 
 cmake -B build `
   -S win32 `
