@@ -4,6 +4,11 @@ $arch = switch ($env:TARGET) {
   default { "x64" }
 }
 
+$env:SAVM_TARGET_TRIPLE = $env:TARGET
+$target = $env:TARGET
+
+$env:SAVM_EDITION = $env:PACKAGE.Replace("$target-", "")
+
 cmake -B build `
   -S win32 `
   -A $arch `
