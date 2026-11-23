@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 cmake_policy(SET CMP0135 NEW)
 
-project(SAVM_INSTALLER_WIN32 LANGUAGES CXX C)
+project(SAVM_INSTALLER_WIN32 LANGUAGES CXX C RC)
 
 include(FetchContent)
 
@@ -132,6 +132,7 @@ add_custom_command(
     -o "${SLINT_GENERATED_HEADER}"
     -I "${CMAKE_CURRENT_SOURCE_DIR}/ui"
     --style "fluent"
+    --embed-resources embed-files
   DEPENDS "${SLINT_UI_FILE}" Slint::Compiler
   COMMENT "Compiling Slint UI markup: ${SLINT_UI_FILE}"
   VERBATIM

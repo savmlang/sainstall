@@ -20,4 +20,6 @@ $store = [System.Security.Cryptography.X509Certificates.X509Store]::new(
 $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
 $store.Add($pfx)
 
+$pfx.Thumbprint > "$PSScriptRoot/thumb.txt"
+
 Remove-Item "./sign.pfx"
