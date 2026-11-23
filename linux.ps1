@@ -19,6 +19,7 @@ else {
 $rustarch = $env:TARGET.Split("-")[0]
 
 # Set ENV
+$env:EDITION = $env:PACKAGE.Split("-")[-1]
 $env:SAVM_EDITION = $env:PACKAGE.Replace("savm-$target-", "")
 $env:SAVM_EXPANDED = Resolve-Path "./tmp/"
 
