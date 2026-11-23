@@ -80,22 +80,7 @@ set_target_properties(Slint::Compiler PROPERTIES
 )
 
 # #embed macros, LICENSE
-set(PAYLOAD_BIN_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/../../LICENSE")
 set(PAYLOAD_BIN_BUILD "${CMAKE_CURRENT_SOURCE_DIR}/../../${ZIP}")
-set(PAYLOAD_HDR "${CMAKE_CURRENT_BINARY_DIR}/generated/embedded_payload.h")
-
-add_custom_command(
-  OUTPUT "${PAYLOAD_HDR}"
-  COMMAND ${CMAKE_COMMAND}
-    -P "${CMAKE_CURRENT_SOURCE_DIR}/generate_embed.cmake"
-    "${PAYLOAD_BIN_LICENSE}"
-    "${PAYLOAD_BIN_BUILD}"
-  DEPENDS "${PAYLOAD_BIN_LICENSE}"
-  DEPENDS "${PAYLOAD_BIN_BUILD}"
-  COMMENT "Embedding ${PAYLOAD_BIN} -> ${PAYLOAD_HDR}"
-  VERBATIM
-)
-
 
 # SaVM CLI Installer
 add_executable(savm_cli
@@ -117,7 +102,6 @@ target_link_options(savm_cli PRIVATE
 )
 target_compile_options(savm_cli PRIVATE /std:c++latest)
 
-target_sources(savm_cli PRIVATE "${PAYLOAD_HDR}")
 target_include_directories(savm_cli PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 # SaVM GUI Installer
@@ -165,8 +149,6 @@ target_link_libraries(savm_gui
   dwmapi
   userenv
 )
-
-target_sources(savm_gui PRIVATE "${PAYLOAD_HDR}")
 
 target_link_options(savm_gui PRIVATE 
   "/SUBSYSTEM:WINDOWS" 

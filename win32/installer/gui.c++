@@ -1,6 +1,6 @@
-#include "embedded_payload.h"
 #include "main_slint.h"
 
+#include "resdata.h++"
 #include "gui.h++"
 #include "installer.h++"
 
@@ -71,6 +71,8 @@ int main(int argc, char *argv[])
       return true;
     };
 
+    
+    auto zip = GetAsset(IDR_ZIPFILE);
     install_info(
       status,
       []() {
@@ -85,8 +87,8 @@ int main(int argc, char *argv[])
       true,
       config,
       Slice {
-        .pt = (char*)ZipFile,
-        .len = ZipFile_SIZE
+        .pt = (char*)zip.data(),
+        .len = zip.size()
       }
     ); 
   }).detach(); });
@@ -162,8 +164,9 @@ void setup(std::span<char *> args, ComponentHandle<MainWindow> window)
   if (!std::ranges::contains(args, license, [](char *s)
                              { return std::string_view(s); }))
   {
+    auto license = GetAsset(IDR_LICENSE);
     window->set_licensegpl(split_to_slint_vec(
-        std::string((char *)LicenseText, LicenseText_SIZE)));
+        std::string((char *)license.data(), license.size())));
   }
 
   TaskId taskid = TaskId::None;

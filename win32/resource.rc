@@ -1,7 +1,13 @@
 #include <windows.h>
+#include "./installer/resourceinfodata.h"
 
-// 1. Application Icon
+// 1. Application Meta + Resources
 1 ICON "assets/salang.ico"
+
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+
+IDR_ZIPFILE     RCDATA     "../../dist.zip"
+IDR_LICENSE     RCDATA     "../../LICENSE"
 
 // 2. Metadata
 VS_VERSION_INFO VERSIONINFO
