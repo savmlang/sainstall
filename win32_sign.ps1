@@ -9,6 +9,8 @@ $signtool = Get-ChildItem -Path "${sdkPath}bin\*\$arch\signtool.exe" | Select-Ob
 
 $thumbprint = Get-Content "$PSScriptRoot/thumb.txt"
 
+Write-Host "Signing: $($env:BINARY)"
+
 & $signtool sign `
   /s "My" /sha1 "$thumbprint" `
   /fd SHA512 /tr "http://timestamp.digicert.com" `

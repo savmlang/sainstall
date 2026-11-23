@@ -21,6 +21,8 @@ cmake --install build --config Release
 
 $items = Get-ChildItem -Path "./dist"
 
+./win32_loadsign.ps1
+
 foreach ($item in $items) {
   if ($item.Name.EndsWith(".exe")) {
     $item.FullName
